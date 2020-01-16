@@ -1,23 +1,28 @@
-from my_app import db
+from .. import db, SECRET_KEY
 from sqlalchemy.orm import relationship
 import jwt
 import datetime
 from datetime import timedelta
- 
-SECRET_KEY="piyush_raj"
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    username = db.Column(db.String(10))
-    password = db.Column(db.String(10))
-    isAdmint = db.Column(db.Boolean)
-    borrows = relationship("Borrow", backref="user")
- 
-    def __init__(self, name, username,password):
+    username = db.Column(db.String(15), nullable=False)
+    password = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(30), nullable=False)
+    religion = db.Column(db.String(20))
+    birthday = db.Column(db.DateTime)
+    gender = db.Column(db.String(6))
+    education = db.Column(db.String(20))
+
+    def __init__(self, name, username,password,email,religion,birthday,gender,education):
         self.name = name
         self.username = username
-        self.password= password
+        self.password = password
+        self.email = email
+        self.religion = religion
+        self.birthday = birthday
+        self.gender = gender
+        self.education = education
 
     def save(self):
         """Save a student to the database.

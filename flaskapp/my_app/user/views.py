@@ -1,16 +1,10 @@
-import json
 from flask import request, jsonify, Blueprint, abort
 from flask.views import MethodView
 from flask import make_response
-from my_app import db, app
-from my_app.user.models import User
+from .. import db, app
+from .models import User
  
 user_blueprint = Blueprint('user', __name__)
- 
-@user_blueprint.route('/')
-@user_blueprint.route('/home')
-def home():
-    return "Welcome to the library Home."
 
 @user_blueprint.route('/profile')
 def profile():
@@ -173,10 +167,10 @@ User_view =  UserView.as_view('user_view')
 Login_view =  LoginView.as_view('login_view')
 
 app.add_url_rule(
-    '/registration/', view_func=User_view, methods=['POST']
+    '/registration', view_func=User_view, methods=['POST']
 )
 app.add_url_rule(
-    '/users/', view_func=User_view, methods=['GET']
+    '/users', view_func=User_view, methods=['GET']
 )
 app.add_url_rule(
     '/user/<int:id>', view_func=User_view, methods=['GET']
