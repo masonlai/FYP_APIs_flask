@@ -11,11 +11,8 @@ flask-sqlalchemy = "*"
 flask-cors = "*"
 flask-marshmallow = "*"
 flask-login = "*"
-jwt = "*"
-mysqldb = "*"
 pymysql = "*"
-python-mysqldb = "*"
-mysqlclient = "*"
+pyjwt = "*"
 
 [requires]
 python_version = "3.7"

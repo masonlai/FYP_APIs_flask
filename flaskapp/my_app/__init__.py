@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 import os, sys, click
 
 SECRET_KEY="masonlai_fyp"
@@ -13,14 +14,14 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', prefix + os.path.join(app.root_path, 'data.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
+CORS(app)
 @app.route('/')
 @app.route('/home')
 def home():
     return jsonify({
         "api_version": "1.0",
         "api_base_url": "http://127.0.0.1:5000/",
-        "api_registration_url": "http://127.0.0.1:5000//registration",
+        "api_registration_url": "http://127.0.0.1:5000/registration",
         "api_login_url": "http://127.0.0.1:5000/login",
         "api_base_url": "http://127.0.0.1:5000/",
         "api_base_url": "http://127.0.0.1:5000/",

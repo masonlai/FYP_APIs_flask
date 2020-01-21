@@ -3,6 +3,7 @@ from flask.views import MethodView
 from flask import make_response
 from .. import db, app
 from .models import User
+import datetime
  
 user_blueprint = Blueprint('user', __name__)
 
@@ -25,55 +26,51 @@ def profile():
 class UserView(MethodView):
  
     def get(self, id=None ):
-        auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[0]
+        res={}
+        users = User.query.all()
+        res = {}
+        for usr in users:
+            res[usr.id] = {
+                'id': usr.id,
+                'name': usr.username,
+                'password': usr.password,
+            }
+        return jsonify(res)
 
-        if access_token:
-         # Attempt to decode the token and get the User ID
-            user_id = User.decode_token(access_token)
-            user=User.query.filter_by(id=user_id).first()
-            if user.isAdmint == True :
-                if not id:
-                    res={}
-                    users = User.query.all()
-                    res = {}
-                    for usr in users:
-                        res[usr.id] = {
-                            'name': usr.name,
-                            'username': str(usr.username),
-                        }
-                    return jsonify(res)
-                else:
-                    usr = User.query.filter_by(id=id).first()
-                    if not usr:
-                        abort(404)
-                    res = {
-                        'name': usr.name,
-                        'username': str(usr.username),
-                    }
-                return jsonify(res)
-            else :
-                response = {
-                     'message': 'you are not authorized to see the page.'
-                 }
 
-                return jsonify(response)    
                     
  
     def post(self):
-        name = request.form.get('name')
         username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email')
+        religion = request.form.get('religion')
         exit_user = User.query.filter_by(username=username).first()
         if not exit_user:
-            password = request.form.get('password')
-            usr = User(name, username,password)
+            usr = User(username, password, email, religion)
             db.session.add(usr)
             db.session.commit()
-            return jsonify({usr.id: {
 
-                'name': usr.name,
-                'username': str(usr.username),
-            }})
+            try:
+                user = User.query.filter_by(username=username).first()
+                access_token = user.generate_token(user.id)
+                if access_token:
+                    response = {
+                        'message': 'You logged in and signed up successfully.',
+                        'access_token': access_token.decode(),
+                        'username': user.username,
+                        'email': usr.email,
+                        'religion': usr.religion
+                    }
+                    return make_response(jsonify(response)), 200
+
+            except Exception as e:
+                # Create a response containing an string error message
+                response = {
+                    'message': str(e) + '1'
+                }
+                # Return a server error using the HTTP Error Code 500 (Internal Server Error)
+                return make_response(jsonify(response)), 500
         else :
             response = {
                  'message': 'User already exists. Please login.'
@@ -118,7 +115,8 @@ class LoginView(MethodView):
                 if access_token:
                     response = {
                         'message': 'You logged in successfully.',
-                        'access_token': access_token.decode()
+                        'access_token': access_token.decode(),
+                        'username':user.username
                     }
                     return make_response(jsonify(response)), 200
             else:
@@ -131,7 +129,7 @@ class LoginView(MethodView):
         except Exception as e:
             # Create a response containing an string error message
             response = {
-                'message': str(e)
+                'message': str(e)+'1'
             }
             # Return a server error using the HTTP Error Code 500 (Internal Server Error)
             return make_response(jsonify(response)), 500
@@ -140,7 +138,7 @@ class LoginView(MethodView):
         # Update the user password for login user
         # with the details provided.
         auth_header = request.headers.get('Authorization')
-        access_token = auth_header.split(" ")[0]
+        access_token = auth_header
 
         if access_token:
             user_id = User.decode_token(access_token)

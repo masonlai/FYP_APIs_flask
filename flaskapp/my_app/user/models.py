@@ -9,13 +9,12 @@ class User(db.Model):
     username = db.Column(db.String(15), nullable=False)
     password = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(30), nullable=False)
-    religion = db.Column(db.String(20))
+    religion = db.Column(db.String(20), nullable=False)
     birthday = db.Column(db.DateTime)
     gender = db.Column(db.String(6))
     education = db.Column(db.String(20))
 
-    def __init__(self, name, username,password,email,religion,birthday,gender,education):
-        self.name = name
+    def __init__(self, username,password,email,religion,birthday=None,gender=None,education=None):
         self.username = username
         self.password = password
         self.email = email

@@ -1,0 +1,29 @@
+def post(self):
+    username = request.form.get('username')
+    password = request.form.get('password')
+    email = request.form.get('email')
+    religion = request.form.get('religion')
+    birthday = str(request.form.get('birthday'))
+    gender = request.form.get('gender')
+    education = request.form.get('education')
+    birthday = datetime.strptime(birthday, "%Y/%m/%d")
+    exit_user = User.query.filter_by(username=username).first()
+    if not exit_user:
+        usr = User(username, password, email, religion, birthday, gender, education)
+        db.session.add(usr)
+        db.session.commit()
+        return jsonify({usr.id: {
+            'username': usr.username,
+            'password': usr.password,
+            'email':usr.email,
+            'religion': usr.religion,
+            'birthday': (usr.birthday).strftime("%Y/%m/%d"),
+            'gender': usr.gender,
+            'emeducationail': usr.education,
+        }})
+    else :
+        response = {
+             'message': 'User already exists. Please login.'
+         }
+
+        return jsonify(response)
