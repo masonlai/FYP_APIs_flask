@@ -36,11 +36,8 @@ app.register_blueprint(book_blueprint)
 app.register_blueprint(borrow_blueprint)
 
 @app.cli.command()
-@click.option('--drop', is_flag=True, help='Create after drop.')
-def initdb(drop):
-    """Initialize the database."""
-    if drop:
-        db.drop_all()
+def initdb():
+    db.drop_all()
     db.create_all()
     click.echo('Initialized database.')
 
