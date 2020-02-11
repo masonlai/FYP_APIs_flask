@@ -41,7 +41,7 @@ def fake():
                                 theme, personal_theme, creating_date)
         db.session.add(pageInfo)
         db.session.commit()
-    for i in range(500):
+    for i in range(200):
         username = fake.first_name()
         password = fake.first_name()
         email = fake.email()
@@ -49,7 +49,7 @@ def fake():
         users = User(username, password, email, religion)
         db.session.add(users)
         db.session.commit()
-    for i in range(3500):
+    for i in range(400):
         content = fake.text(max_nb_chars=200, ext_word_list=None)
         page = DeceasedPage.query.all()
         user = User.query.all()
