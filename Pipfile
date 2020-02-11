@@ -14,6 +14,8 @@ flask-login = "*"
 pymysql = "*"
 pyjwt = "*"
 python-dotenv = "*"
+faker = "*"
+pillow = "*"
 
 [requires]
 python_version = "3.7"
