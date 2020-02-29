@@ -24,7 +24,7 @@ class DeceasedPage(db.Model):
 
     def __init__(self, first_name, last_name, gender, date_of_birth, date_of_death, place_of_birth,
                  nationality, life_profile, portrait, portrait_position, theme, personal_theme, creating_date,
-                 background_music):
+                 background_music=None):
         self.first_name = first_name
         self.last_name = last_name
         self.gender = gender
