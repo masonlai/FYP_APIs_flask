@@ -10,14 +10,18 @@ comment_blueprint = Blueprint('comment', __name__)
 
 
 class CommentView(MethodView):
-    def get(self, id, page):
-        per_page = 10
+    def get(self, id, page, desc):
+        per_page = 9
         items = {0: 'one', 1: 'two', 2: 'three', 3: 'four', 4: 'five', 5: 'six', 6: 'seven', 7: 'eight', 8: 'night',
                  9: 'ten'}
 
-        comment = db.session.query(Comment, User).join(User) \
-            .filter(Comment.page_id == id).order_by(Comment.creating_date.desc()).paginate(page, per_page,
-                                                                                           error_out=False)
+        if desc == 'false':
+            comment = db.session.query(Comment, User).join(User).filter(Comment.page_id == id).\
+                order_by(Comment.creating_date.asc()).paginate(page, per_page,error_out=False)
+        else:
+            comment = db.session.query(Comment, User).join(User).filter(Comment.page_id == id).\
+                order_by(Comment.creating_date.desc()).paginate(page, per_page,error_out=False)
+
         try:
             response = {}
             for i in range(len(comment.items)):
@@ -83,5 +87,5 @@ app.add_url_rule(
     '/CraeteComment', view_func=Comment_View, methods=['POST']
 )
 app.add_url_rule(
-    '/GetComment/<int:id>/<int:page>', view_func=Comment_View, methods=['GET']
+    '/GetComment/<int:id>/<int:page>/<desc>', view_func=Comment_View, methods=['GET']
 )

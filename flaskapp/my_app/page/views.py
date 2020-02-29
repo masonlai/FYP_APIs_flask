@@ -1,4 +1,4 @@
-from flask import request, jsonify, Blueprint, send_file
+from flask import request, jsonify, Blueprint, Response
 from flask.views import MethodView
 from .. import db, app
 import datetime
@@ -7,10 +7,12 @@ import random
 from .models import DeceasedPage
 from ..user.models import User
 from ..visit_record.models import VisitRecord
-from flask import make_response, current_app, send_from_directory
+from flask import make_response, current_app
 from sqlalchemy import or_
-import io
+from io import BytesIO
 from ..comment.models import Comment
+from werkzeug import FileWrapper
+import os
 
 page_blueprint = Blueprint('page', __name__)
 
@@ -19,7 +21,7 @@ page_blueprint = Blueprint('page', __name__)
 def fake():
     genderList = ['Male', 'Female']
     themeList = ['Theme1', 'Theme2', 'Theme3', 'Theme4']
-    position = ['rightTheme','centerTheme','leftTheme']
+    position = ['rightTheme', 'centerTheme', 'leftTheme']
     fake = Faker(locale='en_US')
     for i in range(500):
         first_name = fake.first_name()
@@ -32,7 +34,7 @@ def fake():
         life_profile = fake.text(max_nb_chars=200, ext_word_list=None)
         with open("999.jpg", 'rb') as f:
             byte_im = f.read()
-        portrait_position =random.choice(position)
+        portrait_position = random.choice(position)
         theme = random.choice(themeList)
         personal_theme = None
         creating_date = datetime.datetime.now()
@@ -56,43 +58,64 @@ def fake():
         page_id = random.choice(page)
         user_id = random.choice(user)
         creating_date = datetime.datetime.now()
-        comment_info = Comment(content, page_id.id, creating_date,user_id.id)
+        comment_info = Comment(content, page_id.id, creating_date, user_id.id)
         db.session.add(comment_info)
         db.session.commit()
 
         page_id = random.choice(page)
         user_id = random.choice(user)
         creating_date = datetime.datetime.now()
-        VisitRecord_info = VisitRecord(page_id.id, creating_date,user_id.id)
+        VisitRecord_info = VisitRecord(page_id.id, creating_date, user_id.id)
         db.session.add(VisitRecord_info)
         db.session.commit()
+
 
 @app.cli.command()
 def test():
     page = DeceasedPage.query.all()
     print(page[0].id)
 
+
 class ImageView(MethodView):
     def get(self, id):
         image = DeceasedPage.query.filter_by(id=id).first()
-        return send_file(
-            io.BytesIO(image.portrait),
-            mimetype='image/jpeg', )
+        b = BytesIO(image.portrait)
+        w = FileWrapper(b)
+        return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
+class MelodyView(MethodView):
+    def get(self):
+        melody = os.path.abspath(os.path.dirname(__file__)) + '/melody.jpg'
+        with open(melody, "rb") as image:
+            file = image.read()
+            bytesLike = bytearray(file)
+        b = BytesIO(bytesLike)
+        w = FileWrapper(b)
+        return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
 class ThemeView(MethodView):
     def get(self, id):
         pageInfo = DeceasedPage.query.filter_by(id=id).first()
         if pageInfo.personal_theme != None:
-            return send_file(
-                io.BytesIO(pageInfo.personal_theme),
-                mimetype='image/jpeg', )
+            b = BytesIO(pageInfo.personal_theme)
+            w = FileWrapper(b)
+            return Response(w, mimetype='image/jpeg', direct_passthrough=True)
         else:
             themeName = pageInfo.theme + '.jpg'
-            return send_from_directory(current_app.config['THEME_FOLDER'],
-                                       themeName,
-                                       mimetype='image/jpeg', )
+            theme = os.path.abspath(os.path.dirname(__file__)) + '/' + themeName
+            with open(theme, "rb") as image:
+                file = image.read()
+                bytesLike = bytearray(file)
+            b = BytesIO(bytesLike)
+            w = FileWrapper(b)
+            return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
+class BackgroundMusicView(MethodView):
+    def get(self, id):
+        image = DeceasedPage.query.filter_by(id=id).first()
+        b = BytesIO(image.background_music)
+        w = FileWrapper(b)
+        return Response(w, mimetype='audio/mpeg', direct_passthrough=True)
 
 class PageView(MethodView):
     def get(self, key, page):
@@ -153,6 +176,10 @@ class PageView(MethodView):
                         personal_theme = request.files['personal_theme'].read()
                     except:
                         personal_theme = None
+                    try:
+                        background_music = request.files['background_music'].read()
+                    except:
+                        background_music = None
                     creating_date = datetime.datetime.now()
                     a = date_of_birth.split()
                     b = date_of_death.split()
@@ -160,7 +187,7 @@ class PageView(MethodView):
                     date_of_death = datetime.datetime.strptime(b[1] + b[2] + b[3], '%b%d%Y')
                     pageInfo = DeceasedPage(first_name, last_name, gender, date_of_birth, date_of_death, \
                                             place_of_birth, nationality, life_profile, portrait, portrait_position, \
-                                            theme, personal_theme, creating_date)
+                                            theme, personal_theme, creating_date, background_music)
                     db.session.add(pageInfo)
                     db.session.commit()
                     db.session.flush()
@@ -203,6 +230,9 @@ class PageDetailView(MethodView):
         path = current_app.config['hoster']
         try:
             pageInfo = DeceasedPage.query.filter_by(id=id).first()
+            ifMusic = None
+            if pageInfo.background_music:
+                ifMusic = path + 'Music/' + str(id)
             response = {
                 'id': str(id),
                 'first_name': pageInfo.first_name,
@@ -216,7 +246,10 @@ class PageDetailView(MethodView):
                 'portrait_position': pageInfo.portrait_position,
                 'portrait': path + 'GetImage/' + str(id),
                 'creating_date': pageInfo.creating_date,
-                'theme': path + 'Theme/' + str(id)
+                'theme': path + 'Theme/' + str(id),
+                'Music': ifMusic,
+                'Music_icon': path + 'Melody',
+                'flower_url_base': path + 'flower/'
             }
             return make_response(jsonify(response)), 200
         except Exception as e:
@@ -229,6 +262,8 @@ class PageDetailView(MethodView):
 Page_View = PageView.as_view('Page_View')
 Image_View = ImageView.as_view('Image_View')
 Theme_View = ThemeView.as_view('Theme_View')
+Melody_View = MelodyView.as_view('Melody_View')
+Music_View = BackgroundMusicView.as_view('Music_View')
 Page_Detail_View = PageDetailView.as_view('Page_Detail_View')
 
 app.add_url_rule(
@@ -239,6 +274,12 @@ app.add_url_rule(
 )
 app.add_url_rule(
     '/GetImage/<int:id>', view_func=Image_View, methods=['GET']
+)
+app.add_url_rule(
+    '/Music/<int:id>', view_func=Music_View, methods=['GET']
+)
+app.add_url_rule(
+    '/Melody', view_func=Melody_View, methods=['GET']
 )
 app.add_url_rule(
     '/Page/<int:id>', view_func=Page_Detail_View, methods=['GET']

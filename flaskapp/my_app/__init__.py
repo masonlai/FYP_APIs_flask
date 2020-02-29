@@ -11,10 +11,10 @@ if WIN:
 else:
     prefix = 'sqlite:////'
 
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', prefix + os.path.join(app.root_path, 'data.db'))
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['hoster'] = 'http://127.0.0.1:5000/'
-app.config['THEME_FOLDER'] = './THEME_FOLDER'
 app.config["JSON_SORT_KEYS"] = False
 db = SQLAlchemy(app)
 CORS(app)
