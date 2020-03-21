@@ -23,21 +23,27 @@ CORS(app)
 @app.route('/home')
 def home():
     return jsonify({
-        "api_version": "2.0",
+        "api_version": "3.0",
         "api_base_url": app.config['hoster'],
-        "api_registration_url": app.config['hoster']+"registration",
-        "api_login_url": app.config['hoster']+"login",
-        "api_CreatingPage_url": app.config['hoster']+"CreatingPage",
-        "api_GetPageIndex_url": app.config['hoster']+"GetPageIndex/<key>/<int:page>",
-        "api_getPortrait_url": app.config['hoster']+"GetImage/<int:id>'",
-        "api_getPageInfo_url": app.config['hoster']+"Page/<int:id>",
-        "api_getTheme_url": app.config['hoster']+"Theme/<int:id>",
-        "api_CraeteComment_url": app.config['hoster']+"CraeteComment",
-        "api_GetComment_url": app.config['hoster']+"GetComment/<int:id>/<int:page>",
-        "api_postVisitRecord_url": app.config['hoster']+"visitRecord",
-        "api_getVisitRecord_url": app.config['hoster']+"get_visitRecord/<int:id>",
-        "api_Melody": app.config['hoster'],
-
+        "api_registration_POST": app.config['hoster']+"registration",
+        "api_login_POST": app.config['hoster']+"login",
+        "api_CraeteComment_POST": app.config['hoster']+"CraeteComment",
+        "api_CraeteCommentImage_POST": app.config['hoster'] + "CraeteCommentImage",
+        "api_GetCommentImage_GET": app.config['hoster'] + "GetCommentImage/<int:id>",
+        "api_CraeteCommentVideo_POST": app.config['hoster'] + "CraeteCommentVideo",
+        "api_GetComment_GET": app.config['hoster'] + "GetComment/<int:id>/<int:page>/<desc>",
+        "api_CreatingPage_POST": app.config['hoster'] + "CreatingPage",
+        "api_GetPageIndex_GET": app.config['hoster'] + "GetPageIndex/<key>/<int:page>",
+        "api_GetImage_GET": app.config['hoster'] + "GetImage/<int:id>",
+        "api_Music_GET": app.config['hoster'] + "Music/<int:id>",
+        "api_MelodyImage_GET": app.config['hoster'] + "Melody",
+        "api_Page_GET": app.config['hoster'] + "Page/<int:id>",
+        "api_Theme_GET": app.config['hoster'] + "Theme/<int:id>",
+        "api_DefaultThemeList_GET": app.config['hoster'] + "DefaultThemeList",
+        "api_DefaultTheme_GET": app.config['hoster'] + "DefaultTheme/<name>",
+        "api_AddVisitRecord_POST": app.config['hoster'] + "visitRecord",
+        "api_visit_Record_Flower_View_GET": app.config['hoster'] + "flower/<name>",
+        "api_get_visitRecord——GET": app.config['hoster'] + "get_visitRecord/<int:id>",
 
     })
 
