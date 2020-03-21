@@ -23,19 +23,21 @@ CORS(app)
 @app.route('/home')
 def home():
     return jsonify({
-        "api_version": "1.0",
-        "api_base_url": "http://127.0.0.1:5000/",
-        "api_registration_url": "http://127.0.0.1:5000/registration",
-        "api_login_url": "http://127.0.0.1:5000/login",
-        "api_CreatingPage_url": "http://127.0.0.1:5000/CreatingPage",
-        "api_GetPageIndex_url": "http://127.0.0.1:5000/GetPageIndex/<key>/<int:page>",
-        "api_getPortrait_url": "http://127.0.0.1:5000/GetImage/<int:id>'",
-        "api_getPageInfo_url": "http://127.0.0.1:5000/Page/<int:id>",
-        "api_getTheme_url": "http://127.0.0.1:5000/Theme/<int:id>",
-        "api_CraeteComment_url": "http://127.0.0.1:5000/CraeteComment",
-        "api_GetComment_url": "http://127.0.0.1:5000/GetComment/<int:id>/<int:page>",
-        "api_postVisitRecord_url": "http://127.0.0.1:5000/visitRecord",
-        "api_getVisitRecord_url": "http://127.0.0.1:5000/get_visitRecord/<int:id>",
+        "api_version": "2.0",
+        "api_base_url": app.config['hoster'],
+        "api_registration_url": app.config['hoster']+"registration",
+        "api_login_url": app.config['hoster']+"login",
+        "api_CreatingPage_url": app.config['hoster']+"CreatingPage",
+        "api_GetPageIndex_url": app.config['hoster']+"GetPageIndex/<key>/<int:page>",
+        "api_getPortrait_url": app.config['hoster']+"GetImage/<int:id>'",
+        "api_getPageInfo_url": app.config['hoster']+"Page/<int:id>",
+        "api_getTheme_url": app.config['hoster']+"Theme/<int:id>",
+        "api_CraeteComment_url": app.config['hoster']+"CraeteComment",
+        "api_GetComment_url": app.config['hoster']+"GetComment/<int:id>/<int:page>",
+        "api_postVisitRecord_url": app.config['hoster']+"visitRecord",
+        "api_getVisitRecord_url": app.config['hoster']+"get_visitRecord/<int:id>",
+        "api_Melody": app.config['hoster'],
+
 
     })
 

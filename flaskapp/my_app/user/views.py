@@ -9,6 +9,7 @@ user_blueprint = Blueprint('user', __name__)
 class UserView(MethodView):
 
     def post(self):
+        #sign up an account
         username = request.form.get('username')
         password = request.form.get('password')
         email = request.form.get('email')
@@ -49,6 +50,7 @@ class UserView(MethodView):
 class LoginView(MethodView):
 
     def post(self):
+        #login function and error checking
         try:
             # Get the user object using their email (unique to every user)
             user = User.query.filter_by(username=request.form.get('username')).first()

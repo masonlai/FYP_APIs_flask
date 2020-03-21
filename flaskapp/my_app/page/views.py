@@ -2,21 +2,24 @@ from flask import request, jsonify, Blueprint, Response
 from flask.views import MethodView
 from .. import db, app
 import datetime
-from faker import Faker
-import random
 from .models import DeceasedPage
 from ..user.models import User
-from ..visit_record.models import VisitRecord
 from flask import make_response, current_app
 from sqlalchemy import or_
 from io import BytesIO
-from ..comment.models import Comment
 from werkzeug import FileWrapper
 import os
+from faker import Faker
+import random
+from ..comment.models import Comment
+from ..visit_record.models import VisitRecord
 
 page_blueprint = Blueprint('page', __name__)
 
-
+'''
+this function was using for creating fake data.
+after that, i added some new function which required data input.
+so, this function cant use currently.
 @app.cli.command()
 def fake():
     genderList = ['Male', 'Female']
@@ -61,30 +64,27 @@ def fake():
         comment_info = Comment(content, page_id.id, creating_date, user_id.id)
         db.session.add(comment_info)
         db.session.commit()
-
         page_id = random.choice(page)
         user_id = random.choice(user)
         creating_date = datetime.datetime.now()
         VisitRecord_info = VisitRecord(page_id.id, creating_date, user_id.id)
         db.session.add(VisitRecord_info)
         db.session.commit()
-
-
-@app.cli.command()
-def test():
-    page = DeceasedPage.query.all()
-    print(page[0].id)
+'''
 
 
 class ImageView(MethodView):
     def get(self, id):
+        #show the image of portrait in the page
         image = DeceasedPage.query.filter_by(id=id).first()
         b = BytesIO(image.portrait)
         w = FileWrapper(b)
         return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
+
 class MelodyView(MethodView):
     def get(self):
+        #its just a image for the background music player.
         melody = os.path.abspath(os.path.dirname(__file__)) + '/melody.jpg'
         with open(melody, "rb") as image:
             file = image.read()
@@ -93,16 +93,46 @@ class MelodyView(MethodView):
         w = FileWrapper(b)
         return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
+
+class DefaultThemeViewList(MethodView):
+    def get(self):
+        #show all availble theme for user in the folder(default_theme)
+        #add/modify image in folder -> no more change ->a new option/modify will be showed on the frontend side.
+        path = current_app.config['hoster']
+        destdir = './my_app/page/default_theme'
+        files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
+        newlist = {}
+        for i in range(len(files)):
+            newlist.update({files[i]:path + 'DefaultTheme/' + files[i]})
+        response = {'DefaultTheme': newlist}
+
+        return make_response(jsonify(response)), 200
+
+
+class DefaultThemeView(MethodView):
+    def get(self, name):
+        # it is a function for default theme preview. using in frontend -> createPageForm->step2.js
+        theme = os.path.abspath(os.path.dirname(__file__)) + '/default_theme/' + name
+        with open(theme, "rb") as image:
+            file = image.read()
+            bytesLike = bytearray(file)
+        b = BytesIO(bytesLike)
+        w = FileWrapper(b)
+        return Response(w, mimetype='image/jpeg', direct_passthrough=True)
+
+
+
 class ThemeView(MethodView):
     def get(self, id):
+        # its a function for showing the backgorund of page
         pageInfo = DeceasedPage.query.filter_by(id=id).first()
         if pageInfo.personal_theme != None:
             b = BytesIO(pageInfo.personal_theme)
             w = FileWrapper(b)
             return Response(w, mimetype='image/jpeg', direct_passthrough=True)
         else:
-            themeName = pageInfo.theme + '.jpg'
-            theme = os.path.abspath(os.path.dirname(__file__)) + '/' + themeName
+            themeName = pageInfo.theme
+            theme = os.path.abspath(os.path.dirname(__file__)) + '/default_theme/' + themeName
             with open(theme, "rb") as image:
                 file = image.read()
                 bytesLike = bytearray(file)
@@ -110,21 +140,28 @@ class ThemeView(MethodView):
             w = FileWrapper(b)
             return Response(w, mimetype='image/jpeg', direct_passthrough=True)
 
+
 class BackgroundMusicView(MethodView):
     def get(self, id):
+        #getting the background music on specify page
         image = DeceasedPage.query.filter_by(id=id).first()
         b = BytesIO(image.background_music)
         w = FileWrapper(b)
         return Response(w, mimetype='audio/mpeg', direct_passthrough=True)
 
+
 class PageView(MethodView):
     def get(self, key, page):
+        #find the matching page by searching key
         items = {0: 'one', 1: 'two', 2: 'three', 3: 'four', 4: 'five', 5: 'six', 6: 'seven', 7: 'eight', 8: 'night',
                  9: 'ten'}
         per_page = 10
         path = current_app.config['hoster']
-        pageIndex = DeceasedPage.query.filter(or_(DeceasedPage.first_name.like('%' + key + '%'), \
-                                                  DeceasedPage.last_name.like('%' + key + '%'))) \
+        pageIndex = DeceasedPage.query.filter(
+            or_((DeceasedPage.first_name + ' ' + DeceasedPage.last_name).like('%' + key + '%'), \
+                (DeceasedPage.last_name + ' ' + DeceasedPage.first_name).like('%' + key + '%'), \
+                (DeceasedPage.first_name + DeceasedPage.last_name).like('%' + key + '%'), \
+                (DeceasedPage.last_name + DeceasedPage.first_name).like('%' + key + '%'), )) \
             .order_by(DeceasedPage.creating_date.desc()).paginate(page, per_page, error_out=False)
         try:
             response = {}
@@ -156,6 +193,7 @@ class PageView(MethodView):
             return make_response(jsonify(response)), 500
 
     def post(self):
+        #create a new page
         try:
             access_token = request.form.get('Authorization')
             if access_token != 'undefined':
@@ -227,7 +265,11 @@ class PageView(MethodView):
 
 class PageDetailView(MethodView):
     def get(self, id):
+        #show the detail of specify page by page id
         path = current_app.config['hoster']
+        destdir = './my_app/visit_record/flowers'
+        files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
+
         try:
             pageInfo = DeceasedPage.query.filter_by(id=id).first()
             ifMusic = None
@@ -249,7 +291,8 @@ class PageDetailView(MethodView):
                 'theme': path + 'Theme/' + str(id),
                 'Music': ifMusic,
                 'Music_icon': path + 'Melody',
-                'flower_url_base': path + 'flower/'
+                'flower_url_base': path + 'flower/',
+                'flowers_name': files
             }
             return make_response(jsonify(response)), 200
         except Exception as e:
@@ -265,6 +308,8 @@ Theme_View = ThemeView.as_view('Theme_View')
 Melody_View = MelodyView.as_view('Melody_View')
 Music_View = BackgroundMusicView.as_view('Music_View')
 Page_Detail_View = PageDetailView.as_view('Page_Detail_View')
+Default_Theme_View = DefaultThemeView.as_view('Default_Theme_View')
+Default_Theme_View_List = DefaultThemeViewList.as_view('Default_Theme_View_List')
 
 app.add_url_rule(
     '/CreatingPage', view_func=Page_View, methods=['POST']
@@ -286,4 +331,10 @@ app.add_url_rule(
 )
 app.add_url_rule(
     '/Theme/<int:id>', view_func=Theme_View, methods=['GET']
+)
+app.add_url_rule(
+    '/DefaultThemeList', view_func=Default_Theme_View_List, methods=['GET']
+)
+app.add_url_rule(
+    '/DefaultTheme/<name>', view_func=Default_Theme_View, methods=['GET']
 )

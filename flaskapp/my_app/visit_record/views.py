@@ -11,11 +11,11 @@ import os
 
 visitRecord_blueprint = Blueprint('visit_record', __name__)
 
-
 class visitRecordFlowerView(MethodView):
     def get(self, name):
-        theme = os.path.abspath(os.path.dirname(__file__)) + '/' + name
-        with open(theme, "rb") as image:
+        #show the flower
+        flower = os.path.abspath(os.path.dirname(__file__)) + '/flowers/' + name
+        with open(flower, "rb") as image:
             file = image.read()
             bytesLike = bytearray(file)
         b = BytesIO(bytesLike)
@@ -25,43 +25,31 @@ class visitRecordFlowerView(MethodView):
 
 class visitRecordView(MethodView):
     def get(self, id):
+        #getting the visited record by page id
         path = current_app.config['hoster']
-        items = {0: 'one', 1: 'two', 2: 'three', 3: 'four'}
         record = db.session.query(VisitRecord, User, func.max(VisitRecord.creating_date)) \
             .join(User).filter(VisitRecord.user_id == User.id) \
             .filter(VisitRecord.page_id == id).group_by(VisitRecord.user_id).order_by(
             desc(func.max(VisitRecord.creating_date))).all()
 
-        if len(record) <= 4 and len(record) > 0:
+        if len(record) != 0:
             response = {}
             for i in range(len(record)):
                 response.update({
-                    items[i]: {
+                    str(i): {
                         'username': record[i].User.username,
                         'date': record[i][2],
                         'flower_url': path + 'flower/' + record[i].VisitRecord.flower_name
                     }
                 })
             return make_response(jsonify(response)), 200
-
         else:
-            if len(record) != 0:
-                response = {}
-                for i in range(4):
-                    response.update({
-                        items[i]: {
-                            'username': record[i].User.username,
-                            'date': record[i][2]
-                        }
-                    })
-                return make_response(jsonify(response)), 200
-            else:
-                response = {
-                    'message': 'No',
-                }
-                return make_response(jsonify(response)), 500
+            response = {
+            }
+            return make_response(jsonify(response)), 500
 
     def post(self):
+        #If logined user using 'Floral tributes'. record that
         page_id = request.form.get('page_id')
         creating_date = datetime.datetime.now()
         access_token = request.form.get('Authorization')
