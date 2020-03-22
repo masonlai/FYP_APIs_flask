@@ -267,7 +267,7 @@ class PageDetailView(MethodView):
     def get(self, id):
         #show the detail of specify page by page id
         path = current_app.config['hoster']
-        destdir = os.path.abspath(os.path.dirname(__file__)) + '/flowers'
+        destdir = os.path.abspath(os.path.dirname(__file__)) + '/../visit_record/flowers'
         files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
 
         try:
