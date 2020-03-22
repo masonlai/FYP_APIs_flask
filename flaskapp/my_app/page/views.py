@@ -99,7 +99,7 @@ class DefaultThemeViewList(MethodView):
         #show all availble theme for user in the folder(default_theme)
         #add/modify image in folder -> no more change ->a new option/modify will be showed on the frontend side.
         path = current_app.config['hoster']
-        destdir = './my_app/page/default_theme'
+        destdir = os.path.abspath(os.path.dirname(__file__)) + '/default_theme'
         files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
         newlist = {}
         for i in range(len(files)):
@@ -267,7 +267,7 @@ class PageDetailView(MethodView):
     def get(self, id):
         #show the detail of specify page by page id
         path = current_app.config['hoster']
-        destdir = './my_app/visit_record/flowers'
+        destdir = os.path.abspath(os.path.dirname(__file__)) + '/flowers'
         files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
 
         try:
