@@ -75,7 +75,7 @@ def fake():
 
 class ImageView(MethodView):
     def get(self, id):
-        #show the image of portrait in the page
+        # show the image of portrait in the page
         image = DeceasedPage.query.filter_by(id=id).first()
         b = BytesIO(image.portrait)
         w = FileWrapper(b)
@@ -84,7 +84,7 @@ class ImageView(MethodView):
 
 class MelodyView(MethodView):
     def get(self):
-        #its just a image for the background music player.
+        # its just a image for the background music player.
         melody = os.path.abspath(os.path.dirname(__file__)) + '/melody.jpg'
         with open(melody, "rb") as image:
             file = image.read()
@@ -96,14 +96,14 @@ class MelodyView(MethodView):
 
 class DefaultThemeViewList(MethodView):
     def get(self):
-        #show all availble theme for user in the folder(default_theme)
-        #add/modify image in folder -> no more change ->a new option/modify will be showed on the frontend side.
+        # show all availble theme for user in the folder(default_theme)
+        # add/modify image in folder -> no more change ->a new option/modify will be showed on the frontend side.
         path = current_app.config['hoster']
         destdir = os.path.abspath(os.path.dirname(__file__)) + '/default_theme'
         files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]
         newlist = {}
         for i in range(len(files)):
-            newlist.update({files[i]:path + 'DefaultTheme/' + files[i]})
+            newlist.update({files[i]: path + 'DefaultTheme/' + files[i]})
         response = {'DefaultTheme': newlist}
 
         return make_response(jsonify(response)), 200
@@ -119,7 +119,6 @@ class DefaultThemeView(MethodView):
         b = BytesIO(bytesLike)
         w = FileWrapper(b)
         return Response(w, mimetype='image/jpeg', direct_passthrough=True)
-
 
 
 class ThemeView(MethodView):
@@ -143,7 +142,7 @@ class ThemeView(MethodView):
 
 class BackgroundMusicView(MethodView):
     def get(self, id):
-        #getting the background music on specify page
+        # getting the background music on specify page
         image = DeceasedPage.query.filter_by(id=id).first()
         b = BytesIO(image.background_music)
         w = FileWrapper(b)
@@ -152,7 +151,7 @@ class BackgroundMusicView(MethodView):
 
 class PageView(MethodView):
     def get(self, key, page):
-        #find the matching page by searching key
+        # find the matching page by searching key
         items = {0: 'one', 1: 'two', 2: 'three', 3: 'four', 4: 'five', 5: 'six', 6: 'seven', 7: 'eight', 8: 'night',
                  9: 'ten'}
         per_page = 10
@@ -193,7 +192,7 @@ class PageView(MethodView):
             return make_response(jsonify(response)), 500
 
     def post(self):
-        #create a new page
+        # create a new page
         try:
             access_token = request.form.get('Authorization')
             if access_token != 'undefined':
@@ -214,6 +213,7 @@ class PageView(MethodView):
                         personal_theme = request.files['personal_theme'].read()
                     except:
                         personal_theme = None
+                    creator_id = request.form.get('creator_id')
                     try:
                         background_music = request.files['background_music'].read()
                     except:
@@ -225,7 +225,7 @@ class PageView(MethodView):
                     date_of_death = datetime.datetime.strptime(b[1] + b[2] + b[3], '%b%d%Y')
                     pageInfo = DeceasedPage(first_name, last_name, gender, date_of_birth, date_of_death, \
                                             place_of_birth, nationality, life_profile, portrait, portrait_position, \
-                                            theme, personal_theme, creating_date, background_music)
+                                            theme, personal_theme, creator_id, creating_date, background_music)
                     db.session.add(pageInfo)
                     db.session.commit()
                     db.session.flush()
@@ -265,7 +265,7 @@ class PageView(MethodView):
 
 class PageDetailView(MethodView):
     def get(self, id):
-        #show the detail of specify page by page id
+        # show the detail of specify page by page id
         path = current_app.config['hoster']
         destdir = os.path.abspath(os.path.dirname(__file__)) + '/../visit_record/flowers'
         files = [f for f in os.listdir(destdir) if os.path.isfile(os.path.join(destdir, f))]

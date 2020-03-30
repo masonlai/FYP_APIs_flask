@@ -12,20 +12,15 @@ class User(db.Model):
     password = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(30), nullable=False)
     religion = db.Column(db.String(20), nullable=False)
-    birthday = db.Column(db.DateTime)
-    gender = db.Column(db.String(6))
-    education = db.Column(db.String(20))
     comment = relationship("Comment")
     VisitRecord = relationship("VisitRecord")
+    Page = relationship('DeceasedPage')
 
-    def __init__(self, username, password, email, religion, birthday=None, gender=None, education=None):
+    def __init__(self, username, password, email, religion):
         self.username = username
         self.password = password
         self.email = email
         self.religion = religion
-        self.birthday = birthday
-        self.gender = gender
-        self.education = education
 
     def generate_token(self, user_id):
         """ Generates the access token"""

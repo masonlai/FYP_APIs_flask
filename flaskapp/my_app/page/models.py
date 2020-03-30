@@ -1,5 +1,6 @@
 from .. import db
 from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey
 
 
 class DeceasedPage(db.Model):
@@ -17,13 +18,15 @@ class DeceasedPage(db.Model):
     portrait_position = db.Column(db.String(15), nullable=False)
     theme = db.Column(db.String(20), nullable=True)
     personal_theme = db.Column(db.Binary, nullable=True)
+    creator_id = db.Column(db.Integer, ForeignKey('User.id'))
     creating_date = db.Column(db.DateTime, nullable=False)
     comment = relationship("Comment")
     background_music = db.Column(db.Binary, nullable=True)
     VisitRecord = relationship("VisitRecord")
 
     def __init__(self, first_name, last_name, gender, date_of_birth, date_of_death, place_of_birth,
-                 nationality, life_profile, portrait, portrait_position, theme, personal_theme, creating_date,
+                 nationality, life_profile, portrait, portrait_position, theme, personal_theme, creator_id,
+                 creating_date,
                  background_music=None):
         self.first_name = first_name
         self.last_name = last_name
@@ -37,5 +40,7 @@ class DeceasedPage(db.Model):
         self.portrait_position = portrait_position
         self.theme = theme
         self.personal_theme = personal_theme
+        self.creator_id = creator_id
         self.creating_date = creating_date
         self.background_music = background_music
+
