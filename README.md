@@ -1,4 +1,5 @@
 # fyp_backendAPI
+This a flask application on python.
 
 1. pip install pipenv
 2. pipenv install
